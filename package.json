@@ -2,9 +2,14 @@
   "name": "rockclient",
   "version": "1.0.0",
   "description": "Rock RMS JavaScript Client",
-  "main": "index.js",
+  "source": "src/index.js",
+  "main": "dist/rockclient.js",
+  "module": "dist/rockclient-module.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "standard src/**/*",
+    "format": "standard src/**/* --fix",
+    "watch": "parcel watch",
+    "build": "standard src/**/* --fix && parcel build --detailed-report 20"
   },
   "repository": {
     "type": "git",
@@ -20,5 +25,9 @@
   "bugs": {
     "url": "https://github.com/DTSChurch/RockClient/issues"
   },
-  "homepage": "https://github.com/DTSChurch/RockClient#readme"
+  "homepage": "https://github.com/DTSChurch/RockClient#readme",
+  "devDependencies": {
+    "parcel": "^2.5.0",
+    "standard": "^17.0.0"
+  }
 }
