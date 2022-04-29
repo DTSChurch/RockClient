@@ -1,0 +1,24 @@
+{
+  "name": "rockclient",
+  "version": "1.0.0",
+  "description": "Rock RMS JavaScript Client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DTSChurch/RockClient.git"
+  },
+  "keywords": [
+    "RockRMS",
+    "Rock",
+    "API"
+  ],
+  "author": "Jason Snow <jason@dtschurch.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DTSChurch/RockClient/issues"
+  },
+  "homepage": "https://github.com/DTSChurch/RockClient#readme"
+}
