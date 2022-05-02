@@ -1,7 +1,10 @@
 # RockClient
 Rock RMS JavaScript Client
 
-```(javascript)
+...additional documentation coming soon!
+
+Example Usage:
+```javascript
 var client = window.DTS.RockClient()
 var people = await client.request('People')
     .filter('IsActive eq true')
