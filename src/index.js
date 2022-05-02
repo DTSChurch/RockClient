@@ -72,10 +72,10 @@ export class RockClient {
     config = config || {}
 
     if (_Rock && config.url === undefined) {
-      this.url = `${window.location.origin}/api`
+      this.url = window.location.origin
       this.sameOrigin = true
     } else {
-      this.url = config.url || `${window.location.origin}/api`
+      this.url = config.url || window.location.origin
       this.username = config.username
       this.password = config.password
       this.token = config.token
