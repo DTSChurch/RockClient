@@ -12,7 +12,7 @@ var people = await client.request('People')
     .top(5)
     .orderBy(['LastName', 'FirstName'])
     .select(['Id', 'FirstName', 'LastName', 'Email'])
-    get()
+    .get()
 
 var currentPerson = await client.Lava.render('{{ CurrentPerson | ToJSON }}')
 
