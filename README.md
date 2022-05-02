@@ -7,7 +7,7 @@ Example Usage:
 ```javascript
 var client = window.DTS.RockClient()
 var people = await client.request('People')
-    .filter('IsActive eq true')
+    .filter('IsSystem eq true')
     .skip(1)
     .top(5)
     .orderBy(['LastName', 'FirstName'])
