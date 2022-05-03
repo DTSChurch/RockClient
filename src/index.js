@@ -88,6 +88,7 @@ export class RockClient {
     }
 
     this._memoryCache = _createCache()
+    this.API = {}
   }
 
   async authenticate () {
@@ -179,6 +180,15 @@ export class RockClient {
     }
 
     return {
+      newRequest: function () {
+        _obj.resource = _resource
+        _obj.method = 'GET'
+        _obj.path = undefined
+        _obj.id = undefined
+        _obj.params = {}
+
+        return this
+      },
       method: function (method) {
         _obj.method = method || _obj.method
         return this
@@ -269,7 +279,7 @@ export class RockClient {
         return _requestMethod(_obj)
       },
       getAll: async function () {
-        this.clearId().method('GET').request()
+        return this.clearId().method('GET').request()
       },
       paginate: async function (page, limit) {
         page = page || 0
@@ -286,16 +296,102 @@ export class RockClient {
       post: async function (data) {
         return this.method('POST').body(data).request()
       },
-      patch: async function (data) {
-        return this.method('PATCH').body(data).request()
+      patch: async function (id, data) {
+        return this.method('PATCH').id(id).body(data).request()
       },
-      put: async function (data) {
-        return this.method('PUT').body(data).request()
+      put: async function (id, data) {
+        return this.method('PUT').id(id).body(data).request()
       },
       delete: async function (id) {
         return this.method('DELETE').id(id).request()
+      },
+      attribute: function (attributeKey) {
+        const _reqObj = _obj
+        const _this = this
+        const _attributeKey = attributeKey
+        return {
+          get: async function () {
+            if (_reqObj.id === undefined) {
+              return Promise.reject(new Error('Missing Id'))
+            }
+
+            _this.addParameter('loadAttributes', 'simple')
+            _this.addParameter('attributeKeys', _attributeKey)
+
+            const response = await _this.get()
+            if (response && response.AttributeValues) {
+              return Promise.resolve(response.AttributeValues[_attributeKey])
+            }
+
+            return Promise.resolve()
+          },
+          set: async function (value) {
+            if (_reqObj.id === undefined) {
+              return Promise.reject(new Error('Missing Id'))
+            }
+
+            const _priorResource = _reqObj.resource
+            _this.resource(`${_priorResource}/AttributeValue`)
+            _this.addParameter('attributeKey', _attributeKey)
+            _this.addParameter('attributeValue', value)
+
+            const response = await _this.post()
+
+            _this.clearParameters()
+            _this.resource(_priorResource)
+            return Promise.resolve(response)
+          },
+          delete: async function () {
+            if (_reqObj.id === undefined) {
+              return Promise.reject(new Error('Missing Id'))
+            }
+
+            const _priorResource = _reqObj.resource
+            _this.resource(`${_priorResource}/AttributeValue`)
+            _this.addParameter('attributeKey', _attributeKey)
+            const response = await _this.delete()
+
+            _this.clearParameters()
+            _this.resource(_priorResource)
+            return Promise.resolve(response)
+          }
+        }
       }
     }
+  }
+
+  _baseAPI (_resouce, _useCache) {
+    const _self = this
+    const _apiResource = _resouce
+    const _apiUseCache = _useCache
+    const _baseRequest = _self.request(_apiResource, _apiUseCache, _self)
+    const _baseRequestMethods = {}
+
+    Object.keys(_baseRequest).forEach(key => {
+      _baseRequestMethods[key] = _baseRequest[key]
+    })
+
+    return {
+      ..._baseRequestMethods
+    }
+  }
+
+  async generateAPI (_useCache) {
+    this.API.Lava = this.Lava
+    this.API.Utility = this.Utility
+    this.API.RockDateTime = this.Utility.RockDateTime
+
+    const controllers = await this.request('RestControllers').select('Name').orderBy('Name').getAll()
+    if (controllers && Array.isArray(controllers)) {
+      const _self = this
+      controllers.forEach(controller => {
+        if (_self.API[controller.Name] === undefined) {
+          _self.API[controller.Name] = { ..._self._baseAPI(controller.Name, _useCache) }
+        }
+      })
+    }
+
+    return Promise.resolve(this)
   }
 
   Lava = (function (ctx) {
@@ -332,9 +428,6 @@ export class RockClient {
           static Hours = 'h'
           static Minutes = 'm'
           static Seconds = 's'
-        },
-        DateTimeFormat: class {
-          static ISO8601 = 'yyyy-MM-ddTHH:mm:ssK'
         },
         _getDate: async function (template) {
           const response = await ctx.Lava.render(template)
